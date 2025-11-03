@@ -23,7 +23,7 @@ jobs:
 
       - name: Create Model Directory
         run: |
-          mkdir -p model
+          mkdir -p models
       
       - name: Train model
         run: |
