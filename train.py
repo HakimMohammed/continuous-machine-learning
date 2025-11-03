@@ -7,7 +7,7 @@ import json
 import joblib
 
 # Use centralized hyperparameters
-from hyperparams import N_ESTIMATORS, TEST_SIZE, RANDOM_STATE, MODEL_PATH
+from hyperparams import N_ESTIMATORS, TEST_SIZE, RANDOM_STATE
 
 # Charger les donnees
 iris = load_iris()
