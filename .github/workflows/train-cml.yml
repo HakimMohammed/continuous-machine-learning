@@ -20,6 +20,10 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Create Model Directory
+        run: |
+          mkdir -p model
       
       - name: Train model
         run: |
