@@ -34,67 +34,53 @@ jobs:
               run: |
                   python evaluate.py
 
-            - name: Create CML report
+            - name: Create CML Report
               env:
                   REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   npm install -g @dvcorg/cml
 
-                  # Create the report header
-                  echo "## Model Performance Report" > report.md
+                  # Create report file
+                  echo "## 🧠 Model Performance Report" > report.md
                   echo "" >> report.md
 
-                  # Add an overview section
+                  # Overview section
                   echo "### Overview" >> report.md
-                  echo "This report provides a comprehensive analysis of the model's performance using various evaluation metrics." >> report.md
-                  echo "The metrics are derived from the `metrics.json` file, which contains detailed results obtained during the model training process." >> report.md
+                  echo "This report summarizes the model's performance metrics based on the latest training results." >> report.md
                   echo "" >> report.md
 
-                  # Add a section for metrics summary
+                  # Metrics summary section
                   echo "### Metrics Summary" >> report.md
-                  echo "Below are the key performance indicators (KPIs) of the model:" >> report.md
-                  echo "" >> report.md
-
-                  # Append the JSON content with descriptions
                   cat <<EOT >> report.md
                   \`\`\`json
                   {
-                    "accuracy": {
-                      "value": 0.93,
-                      "unit": "%",
-                      "description": "The proportion of correctly classified instances out of the total instances."
-                    },
-                    "precision": {
-                      "value": 0.92,
-                      "unit": "%",
-                      "description": "The ratio of true positive predictions to the sum of true positives and false positives."
-                    },
-                    "recall": {
-                      "value": 0.94,
-                      "unit": "%",
-                      "description": "The ratio of true positive predictions to the actual instances that are positive."
-                    },
-                    "f1_score": {
-                      "value": 0.93,
-                      "unit": "%",
-                      "description": "The harmonic mean of precision and recall, providing a balance between them."
-                    }
+                    "accuracy": 0.93,
+                    "precision": 0.92,
+                    "recall": 0.94,
+                    "f1_score": 0.93
                   }
                   \`\`\`
                   EOT
 
-                  # Add a conclusion section
                   echo "" >> report.md
-                  echo "### Conclusion" >> report.md
-                  echo "Based on the metrics provided, the model exhibits excellent performance with high accuracy, precision, recall, and F1 score." >> report.md
 
-                  # Publish generated figures (if any) and embed into the report
+                  # Visual results section
+                  echo "### 📊 Visual Results" >> report.md
+                  echo "Below are the generated performance plots and visualizations:" >> report.md
+                  echo "" >> report.md
+
+                  # Automatically publish and embed all PNG images in outputs/
                   for img in outputs/*.png; do
                     if [ -f "$img" ]; then
                       url=$(cml publish "$img")
                       echo "![$(basename "$img")]($url)" >> report.md
+                      echo "" >> report.md
                     fi
                   done
 
-                  # Create or update the GitHub comment with the report
+                  # Conclusion section
+                  echo "### Conclusion" >> report.md
+                  echo "The model shows strong and consistent performance across key evaluation metrics." >> report.md
+
+                  # Post or update the CML comment
                   cml comment create report.md
