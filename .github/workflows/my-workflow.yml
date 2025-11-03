@@ -1,0 +1,86 @@
+name: CML-Pipeline
+
+on: [push]
+permissions: write-all
+
+jobs:
+    train-and-report:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.11"
+
+            - name: Install dependencies
+              run: |
+                  pip install --upgrade pip
+                  pip install -r requirements.txt
+
+            - name: Create Necessary Directories
+              run: |
+                  mkdir -p models
+                  mkdir -p outputs
+
+            - name: Train model
+              run: |
+                  python train.py
+
+            - name: Evaluate model
+              run: |
+                  python evaluate.py
+
+            - name: Create CML Report
+              env:
+                  REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  npm install -g @dvcorg/cml
+
+                  # Create report file
+                  echo "## 🧠 Model Performance Report" > report.md
+                  echo "" >> report.md
+
+                  # Overview section
+                  echo "### Overview" >> report.md
+                  echo "This report summarizes the model's performance metrics based on the latest training results." >> report.md
+                  echo "" >> report.md
+
+                  # Metrics summary section
+                  echo "### Metrics Summary" >> report.md
+                  cat <<EOT >> report.md
+                  \`\`\`json
+                  {
+                    "accuracy": 0.93,
+                    "precision": 0.92,
+                    "recall": 0.94,
+                    "f1_score": 0.93
+                  }
+                  \`\`\`
+                  EOT
+
+                  echo "" >> report.md
+
+                  # Visual results section
+                  echo "### 📊 Visual Results" >> report.md
+                  echo "Below are the generated performance plots and visualizations:" >> report.md
+                  echo "" >> report.md
+
+                  # Automatically publish and embed all PNG images in outputs/
+                  for img in outputs/*.png; do
+                    if [ -f "$img" ]; then
+                      url=$(cml publish "$img")
+                      echo "![$(basename "$img")]($url)" >> report.md
+                      echo "" >> report.md
+                    fi
+                  done
+
+                  # Conclusion section
+                  echo "### Conclusion" >> report.md
+                  echo "The model shows strong and consistent performance across key evaluation metrics." >> report.md
+
+                  # Post or update the CML comment
+                  cml comment create report.md

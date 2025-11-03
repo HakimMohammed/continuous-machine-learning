@@ -6,17 +6,20 @@ from sklearn.metrics import accuracy_score, classification_report
 import json
 import joblib
 
+# Use centralized hyperparameters
+from hyperparams import N_ESTIMATORS, TEST_SIZE, RANDOM_STATE
+
 # Charger les donnees
 iris = load_iris()
 X, y = iris.data, iris.target
 
-# Split train/test
+# Split train/test using hyperparameters
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
+    X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE
 )
 
 # Entrainement
-model = RandomForestClassifier(n_estimators=50, random_state=42)
+model = RandomForestClassifier(n_estimators=N_ESTIMATORS, random_state=RANDOM_STATE)
 model.fit(X_train, y_train)
 
 # Evaluation
@@ -26,11 +29,12 @@ accuracy = accuracy_score(y_test, y_pred)
 # Sauvegarder le modele
 joblib.dump(model, 'models/iris_model.pkl')
 
-# Sauvegarder les metriques
+# Sauvegarder les metriques (include hyperparams for traceability)
 metrics = {
     "accuracy": accuracy,
-    "n_estimators": 100,
-    "test_size": len(X_test)
+    "n_estimators": N_ESTIMATORS,
+    "test_size": TEST_SIZE,
+    "random_state": RANDOM_STATE,
 }
 
 with open('metrics.json', 'w') as f:
