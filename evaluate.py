@@ -13,7 +13,10 @@ from sklearn.metrics import (
     RocCurveDisplay,
 )
 
+from hyperparams import TEST_SIZE, RANDOM_STATE
+
 OUT_DIR = "outputs"
+MODEL_PATH = "models/iris_model.pkl"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 # Recreate the dataset/split (same as in [train.py](train.py) where [`iris`](train.py) was used)
@@ -21,11 +24,12 @@ iris = load_iris()
 X, y = iris.data, iris.target
 feature_names = iris.feature_names
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE
+)
 
 # Load trained model saved by [train.py](train.py) as [`model`](train.py)
-model_path = "models/iris_model.pkl"
-model = joblib.load(model_path)
+model = joblib.load(MODEL_PATH)
 
 # Predictions
 y_pred = model.predict(X_test)
